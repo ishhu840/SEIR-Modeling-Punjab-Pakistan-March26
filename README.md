@@ -157,7 +157,7 @@ To replicate the study's analytical progression from your local environment:
 ## 📊 Core Visual Analyses
 
 ### 1. Spatiotemporal Transmission Hotspots
-![Transmission Hotspots](04_Figures/Fig_Geo_Clusters_LHR_RWP.png)
+04_Figures/Fig_Geo_Clusters_LHR_RWP.png
 
 **What it shows:** Built using exact geo-coordinates, these density heatmaps map out areas of extreme transmission intensity within Lahore and Rawalpindi. It visually confirms that dengue is not uniformly distributed, but rather forms intense, highly specific localized clusters driven by dense urban geography and localized ecological conditions.
 
