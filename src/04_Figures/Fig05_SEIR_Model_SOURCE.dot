@@ -1,0 +1,174 @@
+digraph G {
+    fontname="Arial";
+    rankdir=TB;
+    splines=ortho;
+    nodesep=0.7; 
+    ranksep=1.2;
+    compound=true;
+
+    // Default styles
+    node [fontname="Arial", shape=box, style="rounded,filled", fillcolor="#f8f9fa", color="#343a40", penwidth=1.5, fontsize=14, margin=0.2];
+    edge [fontname="Arial", color="#495057", penwidth=2.5, arrowsize=1.0];
+
+    subgraph cluster_weather {
+        label = "Module A: Climatic Forcing & Environmental Transmission Potential";
+        style = "rounded,filled";
+        fillcolor = "#e3fafc";
+        color = "#15aabf";
+        penwidth = 2;
+        fontsize = 16;
+        fontname="Arial-Bold";
+        margin=20;
+
+        Beta [label=<
+            <table border="0" cellborder="0" cellpadding="4">
+                <tr><td align="center"><b>Time-Varying Transmission Rate <i>β(t)</i></b></td></tr>
+                <tr><td align="center"><font point-size="12"><i>Algorithmic Linkage: Computed independently for each of the 11 cities at every weekly time step (t).</i></font></td></tr>
+                <tr><td align="center"><font point-size="12">Translates localized, delayed meteorological signals into biological transmission force.</font></td></tr>
+                <tr><td align="center"><font point-size="14"><b><i>β(t) = κ · exp(b<sub>0</sub> + b<sub>R</sub>R<sub>L</sub>(t) + b<sub>T</sub>T<sub>L</sub>(t) + b<sub>T2</sub>T<sub>L</sub>²(t))</i></b></font></td></tr>
+            </table>
+        >, fillcolor="#fff", color="#0b7285", shape=box, width=8.5]; // Locked width matches bottom elements
+    }
+
+    subgraph cluster_seir {
+        label = "Module B: Mechanistic Compartmental Dynamics (Conservation: N = S + E + I + R)";
+        style = "rounded,filled";
+        fillcolor = "#fff4e6";
+        color = "#f59f00";
+        penwidth = 2;
+        fontsize = 16;
+        fontname="Arial-Bold";
+        margin=35;
+
+        // Compartment definitions as standard rounded boxes
+        S [label=<
+            <table border="0" cellborder="0" cellpadding="2">
+                <tr><td align="center"><b><font point-size="18">Susceptible (S)</font></b></td></tr>
+                <tr><td align="center"><font point-size="11">Naive or waned hosts</font></td></tr>
+                <tr><td align="center"><font point-size="13" color="#e8590c"><i>S̄(t+1) = S(t) - inc(t) + ω·R(t) + μ(N-S)</i></font></td></tr>
+            </table>
+        >, shape=box, fillcolor="#fff", color="#e8590c", penwidth=3];
+        
+        E [label=<
+            <table border="0" cellborder="0" cellpadding="2">
+                <tr><td align="center"><b><font point-size="18">Exposed (E)</font></b></td></tr>
+                <tr><td align="center"><font point-size="11">Incubating, not infectious</font></td></tr>
+                <tr><td align="center"><font point-size="13" color="#e8590c"><i>Ē(t+1) = E(t) + inc(t) - (σ+μ)·E(t)</i></font></td></tr>
+            </table>
+        >, shape=box, fillcolor="#fff", color="#e8590c", penwidth=3];
+        
+        I [label=<
+            <table border="0" cellborder="0" cellpadding="2">
+                <tr><td align="center"><b><font point-size="18">Infectious (I)</font></b></td></tr>
+                <tr><td align="center"><font point-size="11">Active transmission stage</font></td></tr>
+                <tr><td align="center"><font point-size="13" color="#e8590c"><i>Ī(t+1) = I(t) + σ·E(t) - (γ+μ)·I(t)</i></font></td></tr>
+            </table>
+        >, shape=box, fillcolor="#fff", color="#e8590c", penwidth=3];
+        
+        R [label=<
+            <table border="0" cellborder="0" cellpadding="2">
+                <tr><td align="center"><b><font point-size="18">Recovered (R)</font></b></td></tr>
+                <tr><td align="center"><font point-size="11">Temporary immunity pool</font></td></tr>
+                <tr><td align="center"><font point-size="13" color="#e8590c"><i>R̄(t+1) = R(t) + γ·I(t) - (ω+μ)·R(t)</i></font></td></tr>
+            </table>
+        >, shape=box, fillcolor="#fff", color="#e8590c", penwidth=3];
+
+        // Transition states as CIRCLES
+        Trans [label=<<b>Infection</b><br/><font point-size="10"><i>β(t)·[S(t)·I(t)/N]<br/>+ λ<sub>import</sub></i></font>>, shape=circle, fillcolor="#fff5f5", color="#e03131", penwidth=2, width=1.4, fixedsize=true];
+        Prog [label=<<b>Progression</b><br/><font point-size="10"><i>σ·E(t)</i></font>>, shape=circle, fillcolor="#fff5f5", color="#e03131", penwidth=2, width=1.1, fixedsize=true];
+        Rec [label=<<b>Recovery</b><br/><font point-size="10"><i>γ·I(t)</i></font>>, shape=circle, fillcolor="#fff5f5", color="#e03131", penwidth=2, width=1.1, fixedsize=true];
+        Wane [label=<<b>Waning<br/>Immunity</b><br/><font point-size="10"><i>ω·R(t)</i></font>>, shape=circle, fillcolor="#fff5f5", color="#e03131", penwidth=2, width=1.2, fixedsize=true];
+
+        // Ensure perfect horizontal alignment
+        {rank=same; S; Trans; E; Prog; I; Rec; R;}
+
+        S -> Trans [color="#e8590c"];
+        Trans -> E [color="#e8590c"];
+        E -> Prog [color="#e8590c"];
+        Prog -> I [color="#e8590c"];
+        I -> Rec [color="#e8590c"];
+        Rec -> R [color="#e8590c"];
+        
+        // Waning immunity loop
+        R -> Wane [color="#e8590c", style="dashed"];
+        Wane -> S [color="#e8590c", style="dashed"];
+    }
+
+    subgraph cluster_opt {
+        label = "Module C: Statistical Optimization & Parameter Calibration Framework";
+        style = "rounded,filled";
+        fillcolor = "#ebfbee";
+        color = "#40c057";
+        penwidth = 2;
+        fontsize = 16;
+        fontname="Arial-Bold";
+        margin=20;
+
+        TrainTest [label=<
+            <table border="0" cellborder="0" cellpadding="6">
+                <tr>
+                    <td align="center" colspan="3" bgcolor="#fff" border="1" color="#2b8a3e">
+                        <b>Reporting Linkage (Observation Model): <i>Y<sub>pred</sub>(t) = NegativeBinomial(ρ · I(t), α)</i></b><br/>
+                        <font point-size="11">Stochastically scales true infectious population to observed surveillance cases using Negative Binomial dispersion.</font>
+                    </td>
+                </tr>
+                <tr><td colspan="3" height="5"></td></tr>
+                <tr>
+                    <td align="center" bgcolor="#e6fcf5" border="1" color="#2b8a3e" width="300">
+                        <b>Phase 1: Nelder-Mead Optimization</b><br/><br/>
+                        <font point-size="12">Training Span: 2013-2022 (<b>520 Iterations</b>)</font><br/>
+                        <font point-size="12"><b>Minimizes:</b> MSE + Biological Penalties</font><br/>
+                        <font point-size="12"><b>Selects:</b> Explicit optimal lag combination (<i>r</i><sub>Train</sub>)</font><br/>
+                    </td>
+                    <td align="center" width="10"></td>
+                    <td align="center" bgcolor="#e7f5ff" border="1" color="#339af0" width="300">
+                        <b>Phase 2: Out-Of-Sample Validation</b><br/><br/>
+                        <font point-size="12">Testing Span: 2023-2024 (<b>104 Iterations</b>)</font><br/>
+                        <font point-size="12"><b>Metrics:</b> Pearson <i>r</i>, MAE, RMSE</font><br/>
+                        <font point-size="12">Strict evaluation only (no parameters altered)</font>
+                    </td>
+                </tr>
+            </table>
+        >, shape=box, fillcolor="#fff", color="#40c057", width=8.5, penwidth=2]; // Locked width
+    }
+
+    Params [label=<
+        <table border="0" cellborder="0" cellpadding="3" cellspacing="2">
+            <tr><td align="center" colspan="4"><b>Algorithm Parameter Dictionary</b></td></tr>
+            <tr><td align="left" colspan="4"></td></tr>
+            <tr>
+                <td align="right"><b><i>σ</i></b> :</td><td align="left" width="220">Progression rate (fixed)</td>
+                <td align="right"><b><i>γ</i></b> :</td><td align="left" width="220">Recovery rate (fixed)</td>
+            </tr>
+            <tr>
+                <td align="right"><b><i>ω</i></b> :</td><td align="left">Waning cross-immunity rate</td>
+                <td align="right"><b><i>μ</i></b> :</td><td align="left">Natural death rate (1/68 yr)</td>
+            </tr>
+            <tr>
+                <td align="right"><b><i>λ<sub>import</sub></i></b> :</td><td align="left">Importation scalar</td>
+            </tr>
+            <tr>
+                <td align="right"><b><i>κ</i></b> :</td><td align="left">Base transmission scalar</td>
+                <td align="right"><b><i>ρ</i></b> :</td><td align="left">Reporting fraction</td>
+            </tr>
+            <tr>
+                <td align="right"><b><i>b<sub>0</sub>, b<sub>R</sub>, b<sub>T</sub>, b<sub>T2</sub></i></b> :</td><td align="left">Weather coefficients</td>
+                <td align="right"><b><i>E<sub>0</sub>, I<sub>0</sub></i></b> :</td><td align="left">Initial hidden compartment thresholds</td>
+            </tr>
+            <tr>
+                <td align="right"><b><i>ΔN(t)</i></b> :</td><td align="left">Census pop. growth (added to S)</td>
+                <td align="right"></td><td align="left"></td>
+            </tr>
+        </table>
+    >, shape=box, fillcolor="#f8f9fa", color="#343a40", penwidth=2, margin=0.3, width=8.5]; // Locked width
+
+
+    // ==============================
+    // VERTICAL FLOW (EXACT USER PROPOSAL - NO constraint=false)
+    // ==============================
+
+    Beta -> Trans [style=dashed, color="#0b7285"];
+    I -> TrainTest [style=dashed, color="#e8590c"];
+    TrainTest -> Params;
+
+}

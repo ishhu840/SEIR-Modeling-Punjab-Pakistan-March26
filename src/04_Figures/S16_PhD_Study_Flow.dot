@@ -1,0 +1,90 @@
+digraph G {
+    fontname="Arial";
+    rankdir=TB;
+    splines=true;
+    nodesep=0.8;
+    ranksep=0.8;
+    compound=true;
+
+    // PhD Report Style - SIMPLE, BOLD, HIGH VISIBILITY (User Preferred Style)
+    node [fontname="Arial", shape=box, style="rounded,filled", fillcolor="#ffffff", color="#2c3e50", penwidth=2.5, fontsize=18, margin="0.6,0.5", width=9.0];
+    edge [fontname="Arial", color="#34495e", penwidth=3.0, arrowsize=1.5];
+
+    // STAGE 1: DATA
+    subgraph cluster_0 {
+        label = "Stage 1: Multi-Source Data Acquisition (2013–2024)";
+        style = "filled"; fillcolor = "#f8f9fa"; color = "#bdc3c7"; fontname="Arial-Bold"; fontsize=24; margin=40;
+        
+        Data [label=<
+            <table border="0" cellborder="0" cellpadding="15">
+                <tr><td align="center"><b>Input Datasets from 11 Cities</b></td></tr>
+                <tr><td align="left">• Lab-Confirmed Weekly Dengue Case Records</td></tr>
+                <tr><td align="left">• Daily Weather from Pakistan Meteorological Department (PMD)</td></tr>
+                <tr><td align="left">• Official Population Census from Pakistan Bureau of Statistics (PBS)</td></tr>
+            </table>
+        >];
+    }
+
+    // STAGE 2: PREPARATION
+    subgraph cluster_1 {
+        label = "Stage 2: Data Engineering & Population Dynamics";
+        style = "filled"; fillcolor = "#f3f0ff"; color = "#d0bfff"; fontname="Arial-Bold"; fontsize=24; margin=40;
+        
+        Prep [label=<
+            <table border="0" cellborder="0" cellpadding="15">
+                <tr><td align="center"><b>Processing &amp; Calculation Steps</b></td></tr>
+                <tr><td align="left">1. Synchronizing daily weather data with weekly case reports</td></tr>
+                <tr><td align="left">2. Calculating annual population growth rates using 2017 &amp; 2023 census</td></tr>
+                <tr><td align="left">3. Preparing data sequences for 10-Year Training and 2-Year Testing</td></tr>
+            </table>
+        >];
+    }
+
+    // STAGE 3: MODELING
+    subgraph cluster_2 {
+        label = "Stage 3: Optimization and Mechanistic Modeling Framework";
+        style = "filled"; fillcolor = "#fff5f5"; color = "#ffc9c9"; fontname="Arial-Bold"; fontsize=24; margin=40;
+
+        StepA [label=<
+            <table border="0" cellborder="0" cellpadding="15">
+                <tr><td align="center"><b>Step A: Grid Search for Optimal Lags</b></td></tr>
+                <tr><td align="center">Testing 35+ combinations of Temperature and Rainfall</td></tr>
+                <tr><td align="center">lags (Grid Search) to find the specific timing that</td></tr>
+                <tr><td align="center">best matches the observed dengue patterns in each city</td></tr>
+            </table>
+        >, fillcolor="#fff", color="#e03131"];
+
+        StepB [label=<
+            <table border="0" cellborder="0" cellpadding="15">
+                <tr><td align="center"><b>Step B: Biological SEIR Simulation</b></td></tr>
+                <tr><td align="center">Fitting the SEIR model to each city (2013–2022) while keeping</td></tr>
+                <tr><td align="center">temperature limits biologically realistic (20–35°C) and</td></tr>
+                <tr><td align="center">optimizing the <b>Reporting Fraction (&rho;)</b> per city</td></tr>
+            </table>
+        >, fillcolor="#fff", color="#e03131"];
+        
+        StepA -> StepB [label="  Informing model  ", fontsize=14];
+    }
+
+    // STAGE 4: EVALUATION
+    subgraph cluster_3 {
+        label = "Stage 4: Performance Validation & Significance Testing";
+        style = "filled"; fillcolor = "#e7f5ff"; color = "#a5d8ff"; fontname="Arial-Bold"; fontsize=24; margin=40;
+        
+        Eval [label=<
+            <table border="0" cellborder="0" cellpadding="15">
+                <tr><td align="center"><b>Proving the Model Works</b></td></tr>
+                <tr><td align="left">• <b>Pearson Correlation (r):</b> Comparing model results vs. real 2023–2024 cases</td></tr>
+                <tr><td align="left">• <b>Wilcoxon &amp; Sign Test:</b> Proving our model is <b>systematically superior</b></td></tr>
+                <tr><td align="left">  (consistently better across all cities) than standard fixed-lag models</td></tr>
+                <tr><td align="left">• <b>Fisher Z-transformation:</b> Calculating the 95% Confidence Interval (CI)</td></tr>
+            </table>
+        >];
+    }
+
+    // Logical Connections
+    Data -> Prep [lhead=cluster_1, ltail=cluster_0];
+    Prep -> StepA [lhead=cluster_2, ltail=cluster_1];
+    StepB -> Eval [lhead=cluster_3, ltail=cluster_2];
+
+}

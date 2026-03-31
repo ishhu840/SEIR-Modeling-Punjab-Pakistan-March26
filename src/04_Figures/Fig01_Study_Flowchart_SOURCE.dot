@@ -1,0 +1,219 @@
+digraph G {
+    fontname="Arial";
+    rankdir=TB;
+    splines=ortho;
+    nodesep=1.4; 
+    ranksep=0.8; 
+    compound=true;
+
+    // Default styles
+    node [fontname="Arial", shape=box, style="rounded,filled", fillcolor="#f8f9fa", color="#343a40", penwidth=1.5, fontsize=14, margin=0.2];
+    edge [fontname="Arial", color="#495057", penwidth=2.0, arrowsize=1.0, fontsize=12];
+
+    subgraph cluster_sources {
+        label = "Stage 1: Multi-Source Data Acquisition (11 Districts of Punjab)";
+        style = "rounded,filled";
+        fillcolor = "#f8f9fa";
+        color = "#dee2e6";
+        penwidth = 2;
+        fontsize = 16;
+        fontname="Arial-Bold";
+        margin=20;
+
+        Dengue [label=<
+            <table border="0" cellborder="0" cellpadding="3">
+                <tr><td><b>Dengue Surveillance Data</b></td></tr>
+                <tr><td><font point-size="12">Punjab Dengue Control Program</font></td></tr>
+                <tr><td><font point-size="12"><i>Y<sub>t</sub></i> = Confirmed Weekly Cases</font></td></tr>
+                <tr><td><font point-size="12">Span: 2013-2024 (624 Weeks)</font></td></tr>
+            </table>
+        >, fillcolor="#ffe8cc", color="#fd7e14"];
+        
+        Meteo [label=<
+            <table border="0" cellborder="0" cellpadding="6">
+                <tr><td><b>Meteorological Data</b></td></tr>
+                <tr><td><font point-size="12">Pakistan Meteorological Dept.</font></td></tr>
+                <tr><td><font point-size="12">T(t) = Temp, R(t) = Rain, RH(t), W(t)</font></td></tr>
+                <tr><td><font point-size="12">Span: 2013-2024 (Continuous Daily)</font></td></tr>
+            </table>
+        >, fillcolor="#ebfbee", color="#40c057"];
+        
+        Pop [label=<
+            <table border="0" cellborder="0" cellpadding="3">
+                <tr><td><b>Demographic Data</b></td></tr>
+                <tr><td><font point-size="12">Pakistan Bureau of Statistics</font></td></tr>
+                <tr><td><font point-size="12">6th Census 2017 &amp; 7th Census 2023</font></td></tr>
+                <tr><td><font point-size="12"><i>N(t)</i> = Dynamic Population (linear interp. 2017→2023)</font></td></tr>
+            </table>
+        >, fillcolor="#e3fafc", color="#15aabf"];
+        
+        {rank=same; Dengue; Meteo; Pop;}
+    }
+
+    subgraph cluster_prep {
+        label = "Stage 2A: Data Engineering & Preprocessing";
+        style = "rounded,filled";
+        fillcolor = "#f3f0ff";
+        color = "#d0bfff";
+        penwidth = 2;
+        fontsize = 16;
+        fontname="Arial-Bold";
+        margin=20;
+
+        Integration [label=<
+            <table border="0" cellborder="0" cellpadding="4">
+                <tr><td align="center"><b>Temporal Alignment &amp; Data Integration</b></td></tr>
+                <tr><td align="center"><font point-size="12">Synchronizing daily meteorological variables and demographic records</font></td></tr>
+                <tr><td align="center"><font point-size="12">with epidemiological case data to continuous weekly intervals (<i>t</i>)</font></td></tr>
+            </table>
+        >, fillcolor="#fff", color="#845ef7", shape=rect, width=6.5];
+        
+        Transforms [label=<
+            <table border="0" cellborder="0" cellpadding="6">
+                <tr>
+                    <td align="center"><b>Chronological Partitioning</b><br/> <br/><font point-size="12"><b>Train Set:</b> <i>t</i> = 1...520 (2013-2022)</font><br/><font point-size="12"><b>Test Set:</b> <i>t</i> = 521...624 (2023-2024)</font></td>
+                    <td align="center" width="40"><font color="#845ef7" point-size="28">&#8594;</font></td>
+                    <td align="center"><b>Scaling &amp; Lag Sequence Creation</b><br/> <br/><font point-size="12"><b>Normalization:</b> <i>Z(t) = [X(t) - μ] / σ</i></font><br/><font point-size="12"><b>Lag Generation:</b> <i>Z<sub>L</sub>(t) = Z(t - L)</i></font></td>
+                </tr>
+            </table>
+        >, fillcolor="#fff", color="#845ef7", shape=rect, width=6.5];
+
+        Integration -> Transforms;
+    }
+
+    SplitNode [shape=point, width=0, height=0];
+
+    subgraph cluster_stats {
+        label = "Stage 2B: Preliminary Statistical Validation";
+        style = "rounded,filled";
+        fillcolor = "#e6fcf5";
+        color = "#63e6be";
+        penwidth = 2;
+        fontsize = 16;
+        fontname="Arial-Bold";
+        margin=20;
+
+        Spearman [label=<
+            <table border="0" cellborder="0" cellpadding="4">
+                <tr><td><b>Spearman Rank Correlation</b></td></tr>
+                <tr><td><font point-size="12"><i>ρ = 1 - (6∑d<sub>i</sub><sup>2</sup>) / (n(n<sup>2</sup>-1))</i></font></td></tr>
+                <tr><td><font point-size="12">Validates non-linear monotonic associations</font></td></tr>
+                <tr><td><font point-size="12">between meteorological lags and outbreaks</font></td></tr>
+            </table>
+        >, fillcolor="#fff", color="#12b886"];
+        
+        NB [label=<
+            <table border="0" cellborder="0" cellpadding="4">
+                <tr><td><b>Negative Binomial Regression</b></td></tr>
+                <tr><td><font point-size="12"><i>ln(μ<sub>t</sub>) = β<sub>0</sub> + β<sub>1</sub> R<sub>L</sub>(t) + β<sub>2</sub> T<sub>L</sub>(t)</i></font></td></tr>
+                <tr><td><font point-size="12">Accounts for disease clustering by explicitly</font></td></tr>
+                <tr><td><font point-size="12">capturing statistical overdispersion (Var(Y) &gt; μ)</font></td></tr>
+            </table>
+        >, fillcolor="#fff", color="#12b886"];
+        
+        Sig [label=<
+            <table border="0" cellborder="0" cellpadding="4">
+                <tr><td><b>Biological Link Validation</b></td></tr>
+                <tr><td><font point-size="12">Confirmed highly robust significance (<i>p</i> &lt; 0.001)</font></td></tr>
+            </table>
+        >, fillcolor="#fff", color="#12b886", shape=oval];
+
+        Spearman -> NB -> Sig;
+    }
+
+    subgraph cluster_opt {
+        label = "Stage 3: Nested SEIR Lag Optimization Framework";
+        style = "rounded,filled";
+        fillcolor = "#fff5f5";
+        color = "#ffc9c9";
+        penwidth = 2;
+        fontsize = 16;
+        fontname="Arial-Bold";
+        margin=20;
+
+        Grid [label=<
+            <table border="0" cellborder="0" cellpadding="4">
+                <tr><td><b>Biological Bounds Setup</b></td></tr>
+                <tr><td><font point-size="12">Rainfall Lag Constraints: <i>R<sub>L</sub></i> ∈ [4,8] weeks</font></td></tr>
+                <tr><td><font point-size="12">Temperature Lag Constraints: <i>T<sub>L</sub></i> ∈ [6,12] weeks</font></td></tr>
+                <tr><td><font point-size="12">Ensures vectors align with true mosquito lifespan</font></td></tr>
+            </table>
+        >, fillcolor="#fff", color="#fa5252"];
+        
+        subgraph cluster_inner {
+            label = "Iterative Unconstrained Engine (Calculated per city)";
+            style = "dashed,rounded";
+            fillcolor = "#fff";
+            color = "#fa5252";
+            margin=15;
+
+            NM [label=<
+                <table border="0" cellborder="0" cellpadding="4">
+                    <tr><td><b>Mechanistic SEIR Calibration</b></td></tr>
+                    <tr><td><font point-size="12"><b>Transmission:</b> <i>β(t) = κ·exp(b<sub>0</sub> + b<sub>R</sub>R<sub>L</sub> + b<sub>T</sub>T<sub>L</sub> + b<sub>T2</sub>T<sub>L</sub>²) / N(t)</i></font></td></tr>
+                    <tr><td><font point-size="12"><b>No Annual Reset:</b> Continuous waning immunity <i>ω·R(t)</i></font></td></tr>
+                    <tr><td><font point-size="12"><b>Reporting Fraction:</b> ρ ~ Gaussian prior (logit-space, center=10%)</font></td></tr>
+                    <tr><td><font point-size="12"><b>Optimization:</b> Nelder-Mead Simplex (gradient-free)</font></td></tr>
+                </table>
+            >, fillcolor="#ffe3e3"];
+            
+            Loss [label=<
+                <table border="0" cellborder="0" cellpadding="4">
+                    <tr><td><b>SEIR Loss Function Minimization</b></td></tr>
+                    <tr><td><font point-size="12"><b>Loss</b> = MSE<sub>Train</sub> + λ<sub>T</sub>·Temp Penalty + λ<sub>ρ</sub>·ρ Prior</font></td></tr>
+                    <tr><td><font point-size="12"><i>MSE = (1/n) ∑ (Y<sub>obs</sub> − ρ·inc(t))²</i></font></td></tr>
+                    <tr><td><font point-size="12">Temp penalty: vertex of β(T) must be in [20°C, 35°C]</font></td></tr>
+                    <tr><td><font point-size="12">ρ prior: <i>λ<sub>ρ</sub>·(logit(ρ) − logit(0.10))²</i></font></td></tr>
+                </table>
+            >, fillcolor="#ffe3e3"];
+            NM -> Loss [dir=both, label=" Convergence  "];
+        }
+
+        Select [label=<
+            <table border="0" cellborder="0" cellpadding="4">
+                <tr><td><b>Hyperparameter Selection</b></td></tr>
+                <tr><td><font point-size="12">Optimal lags defined exclusively by achieving</font></td></tr>
+                <tr><td><font point-size="12">the Maximum Model Training Correlation (<i>r</i><sub>Train</sub>)</font></td></tr>
+            </table>
+        >, fillcolor="#fff", color="#fa5252", shape=Mrecord];
+
+        Grid -> NM;
+        Loss -> Select;
+    }
+
+    Sig -> Grid [style="dashed", color="#adb5bd", label="   Validates biological linkage   ", fontcolor="#495057", constraint=false];
+
+    subgraph cluster_final {
+        label = "Stage 4: Operational Forecasting Assessment";
+        style = "rounded,filled";
+        fillcolor = "#e7f5ff";
+        color = "#a5d8ff";
+        penwidth = 2;
+        fontsize = 16;
+        fontname="Arial-Bold";
+        margin=20;
+
+        Eval [label=<
+            <table border="0" cellborder="0" cellpadding="6">
+                <tr><td><b>Final Model Evaluation</b></td></tr>
+                <tr><td><font point-size="12">9 cities evaluated (excl. Gujrat &amp; Hafizabad — zero test cases 2023-2024)</font></td></tr>
+                <tr><td><font point-size="12">Primary metric: Pearson <i>r</i> on held-out test set (2023–2024)</font></td></tr>
+                <tr><td><font point-size="12">Full system trajectories (S, E, I, R) + city-specific parameter tables</font></td></tr>
+                <tr><td><font point-size="12">95% CI via Fisher Z-transformation | Wilcoxon &amp; sign tests across cities</font></td></tr>
+            </table>
+        >, fillcolor="#fff", color="#228be6", shape=rect, width=6.5];
+    }
+
+    Dengue -> Integration [lhead=cluster_prep];
+    Meteo -> Integration [lhead=cluster_prep];
+    Pop -> Integration [lhead=cluster_prep];
+    
+    Transforms -> SplitNode [dir=none, minlen=1];
+    
+    SplitNode -> Spearman [lhead=cluster_stats, label=""];
+    SplitNode -> Grid [lhead=cluster_opt, label=""];
+    
+    // STRICT FIX: The arrow ONLY comes from Stage 3. It DOES NOT come from Stage 2B.
+    Select -> Eval [ltail=cluster_opt, lhead=cluster_final];
+
+}

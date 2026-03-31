@@ -1,0 +1,97 @@
+digraph G {
+    fontname="Arial";
+    rankdir=TB;
+    splines=polyline;
+    nodesep=1.8;
+    ranksep=1.5;
+    compound=true;
+
+    // Professional PhD Report Style - Maximum High-Density Layout
+    node [fontname="Arial", shape=box, style="rounded,filled", fillcolor="#ffffff", color="#2c3e50", penwidth=4.5, fontsize=32, margin="0.6,0.5"];
+    edge [fontname="Arial", color="#34495e", penwidth=6.0, arrowsize=2.5];
+
+    // --- TOP SECTION: THE CORE COMPARTMENT MODEL ---
+    subgraph cluster_seir_core {
+        label = "THE CORE MECHANISTIC SEIR COMPARTMENT MODEL";
+        fontname="Arial-Bold"; fontsize=64; color="#845ef7"; style="filled"; fillcolor="#f3f0ff"; margin=50;
+
+        S [label=<
+            <table border="0" cellborder="0" cellpadding="35" width="550">
+                <tr><td align="center"><b><font point-size="64">Susceptible (S)</font></b></td></tr>
+                <tr><td align="center" bgcolor="#fff"><font point-size="38">S<sub>t+1</sub> = S<sub>t</sub> - inc<sub>t</sub> + &omega;R<sub>t</sub> + &mu;(N<sub>t</sub>-S<sub>t</sub>) + &Delta;N<sub>t</sub></font></td></tr>
+            </table>
+        >, fillcolor="#fff", width=8.0];
+
+        E [label=<
+            <table border="0" cellborder="0" cellpadding="35" width="550">
+                <tr><td align="center"><b><font point-size="64">Exposed (E)</font></b></td></tr>
+                <tr><td align="center" bgcolor="#fff"><font point-size="38">E<sub>t+1</sub> = E<sub>t</sub> + inc<sub>t</sub> - (&sigma;+&mu;)E<sub>t</sub></font></td></tr>
+            </table>
+        >, fillcolor="#fff", width=8.0];
+
+        I [label=<
+            <table border="0" cellborder="0" cellpadding="35" width="550">
+                <tr><td align="center"><b><font point-size="64">Infectious (I)</font></b></td></tr>
+                <tr><td align="center" bgcolor="#fff"><font point-size="38">I<sub>t+1</sub> = I<sub>t</sub> + &sigma;E<sub>t</sub> - (&gamma;+&mu;)I<sub>t</sub></font></td></tr>
+            </table>
+        >, fillcolor="#fff", width=8.0];
+
+        R [label=<
+            <table border="0" cellborder="0" cellpadding="35" width="550">
+                <tr><td align="center"><b><font point-size="64">Recovered (R)</font></b></td></tr>
+                <tr><td align="center" bgcolor="#fff"><font point-size="38">R<sub>t+1</sub> = R<sub>t</sub> + &gamma;I<sub>t</sub> - (&omega;+&mu;)R<sub>t</sub></font></td></tr>
+            </table>
+        >, fillcolor="#fff", width=8.0];
+
+        // Forward Flows
+        S -> E [label=< <font point-size="32">Infection: &beta;(t)SI/N + &lambda;</font> >, fontcolor="#e67e22"];
+        E -> I [label=< <font point-size="32">Progression: &sigma;E</font> >, fontcolor="#2980b9"];
+        I -> R [label=< <font point-size="32">Recovery: &gamma;I</font> >, fontcolor="#27ae60"];
+        
+        {rank=same; S; E; I; R;}
+    }
+
+    // --- WANING IMMUNITY LOOP - FORCED UNDER THE BOXES (SOUTH PORTS) ---
+    // Using dir=back to force Graphviz to route it through the bottom
+    S:s -> R:s [xlabel=< <font point-size="32">Waning Immunity: &omega;R</font> >, style="dashed", fontcolor="#8e44ad", constraint=false, penwidth=5.0, tailport=s, headport=s, dir=back];
+
+    // --- MIDDLE SECTION: WEATHER DRIVER ---
+    Weather [label=<
+        <table border="0" cellborder="0" cellpadding="30" width="1600">
+            <tr><td align="center" bgcolor="#ebfbee"><b><font point-size="44">Transmission Driver: &beta;(t) = &kappa; &middot; exp(b₀ + b<sub>R</sub>R<sub>L</sub> + b<sub>T</sub>T<sub>L</sub> + b<sub>T²</sub>T<sub>L</sub>²)</font></b></td></tr>
+            <tr><td align="center"><font point-size="28">Driving the force of infection by coupling delayed Rainfall (R<sub>L</sub>) and Temperature (T<sub>L</sub>) to the SEIR compartments</font></td></tr>
+        </table>
+    >, fillcolor="#fff", color="#40c057", width=18.0];
+
+    // --- BOTTOM SECTION: THE "WHERE" SECTION (DEFINITIONS) ---
+    Definitions [label=<
+        <table border="0" cellborder="1" cellspacing="0" cellpadding="25" width="1600" bgcolor="#fff">
+            <tr><td align="center" colspan="4" bgcolor="#f8f9fa"><b><font point-size="38">Equation Variables &amp; Parameter Definitions (Where: )</font></b></td></tr>
+            <tr>
+                <td align="left"><b><font point-size="30">&beta;(t)</font></b> : Time-varying transmission rate</td>
+                <td align="left"><b><font point-size="30">inc<sub>t</sub></font></b> : New infections at week <i>t</i></td>
+                <td align="left"><b><font point-size="30">&sigma;</font></b> : Incubation rate (Fixed: 7/6 week)</td>
+                <td align="left"><b><font point-size="30">&kappa;</font></b> : Base transmission scalar (Fitted)</td>
+            </tr>
+            <tr>
+                <td align="left"><b><font point-size="30">&omega;</font></b> : Waning immunity rate (1/2.5 yr)</td>
+                <td align="left"><b><font point-size="30">&lambda;</font></b> : Virus importation rate (Fitted)</td>
+                <td align="left"><b><font point-size="30">&gamma;</font></b> : Recovery rate (Fixed: 7/5 week)</td>
+                <td align="left"><b><font point-size="30">&rho;</font></b> : Reporting fraction (Fitted)</td>
+            </tr>
+            <tr>
+                <td align="left"><b><font point-size="30">&mu;</font></b> : Natural mortality rate (1/68 yr)</td>
+                <td align="left"><b><font point-size="30">N<sub>t</sub></font></b> : Total urban population at time <i>t</i></td>
+                <td align="left"><b><font point-size="30">&Delta;N<sub>t</sub></font></b> : Yearly census-based growth rate</td>
+                <td align="left"><b><font point-size="30">b<sub>0,R,T,T2</sub></font></b> : Weather coefficients (Fitted)</td>
+            </tr>
+        </table>
+    >, color="#343a40", penwidth=4.0, width=18.0];
+
+    // --- ALIGNMENT ---
+    // Increased minlen to 3 to push the weather driver down, giving space for the R:s->S:s arrow
+    E -> Weather [style=invis, minlen=3];
+    I -> Weather [style=invis, minlen=3];
+    Weather -> Definitions [style=invis, minlen=1];
+
+}
